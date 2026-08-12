@@ -1,0 +1,6 @@
+# Configuration publique Supabase de ME Planner.
+# Copiez ce fichier vers .env.local avant le développement local.
+# Ne jamais ajouter une clé service_role dans ce fichier ou dans le frontend.
+VITE_SUPABASE_URL=https://qjqrwyikoiujwqqfaica.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_Dl1NiD7YhJyi5ExBYx2ZdA_fON7zrKp
+
