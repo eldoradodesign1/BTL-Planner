@@ -9,7 +9,7 @@ import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 
 type AuthMode = "signin" | "signup" | "recovery";
 type PendingAction = AuthMode | null;
-const logoUrl = "/manus-storage/Mon_Essentiel_Label_08294d67.png";
+const logoUrl = `${import.meta.env.BASE_URL}assets/Mon_Essentiel_Label.png`;
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(isSupabaseConfigured);
@@ -53,7 +53,7 @@ function AuthScreen() {
         if (result.data.session) setMessage("Votre espace est prêt. Ouverture en cours…");
         else setMessage("Compte créé. Consultez votre boîte mail pour confirmer l’adresse avant de vous connecter.");
       } else {
-        const result = await client.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/` });
+        const result = await client.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}${import.meta.env.BASE_URL}` });
         if (result.error) throw result.error;
         setMessage("Un lien de récupération vient d’être envoyé si cette adresse existe.");
       }

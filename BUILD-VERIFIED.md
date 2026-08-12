@@ -19,7 +19,13 @@ Pour vérifier le serveur de production local :
 
 ```bash
 pnpm build
-pnpm start
+pnpm build
 ```
 
-Le dossier `dist/` est régénérable et volontairement exclu de Git. Le workflow GitHub Actions reproduit automatiquement ces vérifications à chaque push ou pull request.
+Pour simuler le bundle GitHub Pages du dépôt actuel :
+
+```bash
+VITE_BASE_PATH=/BTL-Planner/ pnpm build:pages
+```
+
+Le dossier `dist/public/` contient alors l’index et tous les assets avec le préfixe `/BTL-Planner/`. Le workflow GitHub Actions reproduit automatiquement cette configuration à chaque push sur `main`. Les dossiers `dist/` et `node_modules/` sont régénérables et volontairement exclus de Git.

@@ -106,3 +106,11 @@ Consultez `docs/DEVELOPER_GUIDE.md` pour l’architecture et les migrations, `do
 ## Licence
 
 Le projet est distribué sous licence MIT. Voir `LICENSE`.
+
+## Déploiement automatique sur GitHub Pages
+
+Le workflow `.github/workflows/ci.yml` déploie automatiquement `dist/` sur GitHub Pages après chaque push sur `main`. Il calcule le sous-chemin à partir du nom réel du dépôt : `/BTL-Planner/` si le dépôt conserve son nom actuel, ou `/ME-Planner/` après renommage.
+
+Après le premier push, dans GitHub ouvrez **Settings → Pages**, choisissez **GitHub Actions** comme source, puis attendez la fin du workflow `ME Planner CI`. L’URL sera généralement `https://VOTRE_COMPTE.github.io/NOM_DU_DEPOT/`.
+
+Le build Pages utilise `pnpm build:pages`, tandis que `pnpm build` reste disponible pour le serveur Node local. Les logos et favicons sont inclus dans `client/public/assets`, de sorte que le site publié ne dépend pas de Manus Storage.

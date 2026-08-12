@@ -100,3 +100,7 @@
 - [x] Ajouter ou compléter la documentation d’installation, Supabase et variables d’environnement.
 - [x] Préparer les fichiers GitHub et vérifier le build de production.
 - [x] Produire et inspecter le ZIP final avec une procédure d’installation reproductible.
+- [x] Adapter le build Vite au sous-chemin réel du dépôt GitHub Pages.
+- [x] Ajouter la configuration de routage et de fallback pour GitHub Pages.
+- [x] Ajouter un workflow GitHub Actions de déploiement Pages.
+- [x] Tester le build statique dans un sous-chemin et régénérer le ZIP Pages.

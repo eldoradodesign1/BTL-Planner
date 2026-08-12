@@ -11,7 +11,7 @@ import { useI18n } from "@/lib/i18n";
 import { useTaskReminderNotifications } from "@/hooks/useTaskReminderNotifications";
 import { loadShortcuts, matchesShortcut } from "@/lib/shortcuts";
 
-const logoUrl = "/manus-storage/me-planner-monochrome_184db017.png";
+const logoUrl = `${import.meta.env.BASE_URL}assets/me-planner-monochrome.png`;
 const navItems: { id: ViewName; label: string; icon: typeof LayoutDashboard; shortcut?: string }[] = [
   { id: "dashboard", label: "Vue d’ensemble", icon: LayoutDashboard },
   { id: "calendar", label: "Calendrier", icon: CalendarDays, shortcut: "M" },
@@ -41,7 +41,7 @@ export function PlannerShell({ children }: { children: React.ReactNode }) {
     document.documentElement.dataset.theme = store.theme;
     localStorage.setItem("me-planner-theme", store.theme);
     const favicon = document.querySelector<HTMLLinkElement>("link[data-me-favicon]");
-    if (favicon) favicon.href = store.theme === "dark" ? "/favicon-dark.svg" : "/favicon-light.svg";
+    if (favicon) favicon.href = `${import.meta.env.BASE_URL}assets/${store.theme === "dark" ? "favicon-dark.svg" : "favicon-light.svg"}`;
   }, [store.theme]);
 
   useEffect(() => {
