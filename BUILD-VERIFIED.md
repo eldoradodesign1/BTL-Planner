@@ -1,31 +1,42 @@
-# État du build
+# Architecture ME Planner — Mon Essentiel
 
-Le livrable ME Planner a été vérifié avec Node.js 22 et pnpm 10 :
+## Vue d’ensemble
 
-```text
-pnpm check  → OK
-pnpm test   → 9 tests passés
-pnpm build  → OK
+```mermaid
+flowchart LR
+  Browser[React + Vite + Tailwind] --> Shell[PlannerShell]
+  Shell --> Dashboard[Dashboard]
+  Shell --> Calendar[Calendar workspace]
+  Shell --> Tasks[Task workspace]
+  Shell --> Team[Chat / Inbox / Admin]
+  Browser --> Auth[Supabase Auth]
+  Browser --> Client[Supabase JS client]
+  Client --> RLS[Postgres + RLS]
+  Client --> Realtime[Supabase Realtime]
+  Client --> Storage[Supabase Storage]
+  RLS --> Profiles[(profiles)]
+  RLS --> Projects[(projects)]
+  RLS --> TaskTable[(tasks)]
+  RLS --> Conversations[(conversations / messages)]
+  Realtime --> Browser
 ```
 
-Après extraction, exécutez :
+## Flux d’authentification
 
-```bash
-pnpm install
-pnpm dev
+```mermaid
+sequenceDiagram
+  participant U as Utilisateur
+  participant A as AuthGate
+  participant S as Supabase Auth
+  participant P as Postgres
+  U->>A: Saisit email + mot de passe
+  A->>S: signInWithPassword
+  S-->>A: Session + JWT utilisateur
+  A->>P: Requêtes avec rôle authenticated
+  P-->>A: Données filtrées par RLS
+  A-->>U: Workspace ME Planner
 ```
 
-Pour vérifier le serveur de production local :
+## Principes de frontière
 
-```bash
-pnpm build
-pnpm build
-```
-
-Pour simuler le bundle GitHub Pages du dépôt actuel :
-
-```bash
-VITE_BASE_PATH=/BTL-Planner/ pnpm build:pages
-```
-
-Le dossier `dist/public/` contient alors l’index et tous les assets avec le préfixe `/BTL-Planner/`. Le workflow GitHub Actions reproduit automatiquement cette configuration à chaque push sur `main`. Les dossiers `dist/` et `node_modules/` sont régénérables et volontairement exclus de Git.
+Le navigateur ne reçoit qu’une clé publishable et un JWT de session. Les policies RLS déterminent l’accès aux lignes. Une éventuelle clé `sb_secret` ne doit être utilisée que dans un environnement backend contrôlé, jamais dans `VITE_*`, le client React ou le dépôt GitHub.

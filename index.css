@@ -1,0 +1,51 @@
+/**
+ * Direction visuelle : Aquarelle de contrôle — commandes compactes, surfaces calmes,
+ * menus réversibles et repères cyan pour remplacer les widgets natifs du navigateur.
+ */
+import { ChevronDown, ChevronLeft, ChevronRight, Clock3 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { addDays, addMonths, endOfMonth, format, getDay, getDaysInMonth, isSameDay, startOfMonth, subMonths } from "date-fns";
+import { fr } from "date-fns/locale";
+
+export type CustomSelectOption = { value: string; label: string };
+
+export function CustomSelect({ value, onChange, options, icon, disabled = false, ariaLabel }: { value: string; onChange: (value: string) => void; options: CustomSelectOption[]; icon?: React.ReactNode; disabled?: boolean; ariaLabel?: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const active = options.find((option) => option.value === value) ?? options[0];
+  useEffect(() => {
+    const close = (event: PointerEvent) => { if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false); };
+    const escape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
+    document.addEventListener("pointerdown", close); document.addEventListener("keydown", escape);
+    return () => { document.removeEventListener("pointerdown", close); document.removeEventListener("keydown", escape); };
+  }, []);
+  return <div className={`custom-control-select ${open ? "is-open" : ""}`} ref={ref}><button type="button" className="custom-control-trigger" disabled={disabled} aria-label={ariaLabel} aria-expanded={open} aria-haspopup="listbox" onClick={() => setOpen((current) => !current)}>{icon}<span>{active?.label ?? "Sélectionner"}</span><ChevronDown size={14} /></button>{open && <div className="custom-control-menu" role="listbox">{options.map((option) => <button type="button" role="option" aria-selected={option.value === value} className={option.value === value ? "is-selected" : ""} key={option.value} onClick={() => { onChange(option.value); setOpen(false); }}>{option.label}</button>)}</div>}</div>;
+}
+
+function parseLocalDate(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  return year && month && day ? new Date(year, month - 1, day) : new Date();
+}
+
+export function CustomDatePicker({ value, onChange, label }: { value: string; onChange: (value: string) => void; label?: string }) {
+  const [open, setOpen] = useState(false);
+  const [month, setMonth] = useState(() => startOfMonth(parseLocalDate(value)));
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = parseLocalDate(value);
+  const days = useMemo(() => { const first = startOfMonth(month); const offset = (getDay(first) + 6) % 7; return Array.from({ length: offset + getDaysInMonth(month) }, (_, index) => index < offset ? null : addDays(first, index - offset)); }, [month]);
+  useEffect(() => { const close = (event: PointerEvent) => { if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false); }; document.addEventListener("pointerdown", close); return () => document.removeEventListener("pointerdown", close); }, []);
+  return <div className="custom-date-control" ref={ref}><button type="button" className="custom-control-trigger" aria-label={label ?? "Choisir une date"} aria-expanded={open} onClick={() => setOpen((current) => !current)}><span className="custom-control-date-icon">{format(selected, "d")}</span><span>{format(selected, "d MMM yyyy", { locale: fr })}</span><ChevronDown size={14} /></button>{open && <div className="custom-calendar-menu"><div className="custom-calendar-head"><button type="button" onClick={() => setMonth((current) => subMonths(current, 1))} aria-label="Mois précédent"><ChevronLeft size={14} /></button><strong>{format(month, "MMMM yyyy", { locale: fr })}</strong><button type="button" onClick={() => setMonth((current) => addMonths(current, 1))} aria-label="Mois suivant"><ChevronRight size={14} /></button></div><div className="custom-calendar-weekdays">{["Lu", "Ma", "Me", "Je", "Ve", "Sa", "Di"].map((day) => <span key={day}>{day}</span>)}</div><div className="custom-calendar-grid">{days.map((day, index) => day ? <button type="button" key={day.toISOString()} className={isSameDay(day, selected) ? "is-selected" : ""} onClick={() => { onChange(format(day, "yyyy-MM-dd")); setOpen(false); }}>{format(day, "d")}</button> : <span key={`empty-${index}`} />)}</div></div>}</div>;
+}
+
+export function CustomTimePicker({ value, onChange, label }: { value: string; onChange: (value: string) => void; label?: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const options = useMemo(() => { const values = Array.from({ length: 29 }, (_, index) => { const minutes = 8 * 60 + index * 30; return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`; }); return values.includes(value) ? values : [value, ...values]; }, [value]);
+  useEffect(() => { const close = (event: PointerEvent) => { if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false); }; document.addEventListener("pointerdown", close); return () => document.removeEventListener("pointerdown", close); }, []);
+  return <div className="custom-time-control" ref={ref}><button type="button" className="custom-control-trigger" aria-label={label ?? "Choisir une heure"} aria-expanded={open} onClick={() => setOpen((current) => !current)}><Clock3 size={15} /><span>{value}</span><ChevronDown size={14} /></button>{open && <div className="custom-time-menu" role="listbox">{options.map((option) => <button type="button" role="option" aria-selected={option === value} className={option === value ? "is-selected" : ""} key={option} onClick={() => { onChange(option); setOpen(false); }}>{option}</button>)}</div>}</div>;
+}
+
+export function CustomDateTimePicker({ value, onChange, label }: { value: string; onChange: (value: string) => void; label?: string }) {
+  const [date, time = "09:00"] = value ? value.split("T") : [format(new Date(), "yyyy-MM-dd"), "09:00"];
+  return <div className="custom-datetime-control"><CustomDatePicker value={date} onChange={(nextDate) => onChange(`${nextDate}T${time}`)} label={label ?? "Choisir la date du rappel"} /><CustomTimePicker value={time} onChange={(nextTime) => onChange(`${date}T${nextTime}`)} label="Choisir l’heure du rappel" /></div>;
+}

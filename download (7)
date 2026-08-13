@@ -1,0 +1,20 @@
+# Guide développeur
+
+## Installation
+
+```bash
+pnpm install
+pnpm dev
+pnpm check
+pnpm build
+```
+
+## Supabase
+
+Appliquez `supabase/schema.sql` dans l’éditeur SQL du projet ME Planner. Configurez ensuite `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY` dans l’environnement de développement et dans l’hébergement. Si le schéma a déjà été appliqué avant la correction du premier compte, exécutez `supabase/fix_first_account.sql`, qui est non destructive et répare les profils manquants, le trigger Auth et la RPC `claim_initial_admin`. Pour l’avatar, exécutez ensuite `supabase/profile_avatar.sql`; pour le chat déjà installé, exécutez `supabase/fix_chat.sql` afin d’ajouter les policies d’insertion, de mise à jour et de suppression des conversations. Pour les rappels sur une base déjà installée, exécutez `supabase/reminders.sql`; il ajoute uniquement `tasks.reminder_at` et son index. Pour une base déjà installée, exécutez également `supabase/account_roles.sql`; il ajoute le rôle `admin` et un trigger qui interdit aux directeurs ou membres de modifier les rôles. Seuls les `admin` et `super_admin` peuvent gérer les rôles depuis l’interface. Le calendrier persiste `start_at`, `end_at`, `estimated_minutes` et `reminder_at`; le DnD et le redimensionnement sont des mutations contrôlées qui réécrivent ces valeurs. Le favicon est basculé par le shell entre `favicon-dark.svg` et `favicon-light.svg` selon le thème. Le fallback dans `client/src/lib/supabase.ts` pointe vers le projet Mon Essentiel, mais les variables d’environnement restent la méthode recommandée pour les forks et les environnements distincts.
+
+## Conventions
+
+Les types métier sont regroupés dans `client/src/lib/types.ts`. Le store Zustand porte l’état d’interface et le fallback local. Le hook `useSupabaseTaskSync` tente de charger les tâches visibles selon RLS et écoute les changements Realtime ; si la migration n’est pas encore appliquée, il conserve les données locales sans bloquer l’interface.
+
+Les composants visuels doivent rester compatibles avec les quatre thèmes et respecter `prefers-reduced-motion`. Les actions d’écriture sensibles doivent être confirmées par un état de chargement, une erreur explicite et une invalidation ou resynchronisation des données.
